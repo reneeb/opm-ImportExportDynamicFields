@@ -13,7 +13,6 @@
     <Description Lang="en">Import/Export dynamic fields</Description>
     <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
     <Filelist>
-        <File Permission="644" Location="ImportExportDynamicsFields.sopm" />
         <File Permission="644" Location="Kernel/Config/Files/ImportExportDynamicFields.xml" />
         <File Permission="644" Location="Kernel/System/DynamicField/PerlServicesUtils.pm" />
         <File Permission="755" Location="bin/ps.ImportExportDynamicFields.pl" />
