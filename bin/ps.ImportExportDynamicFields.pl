@@ -2,7 +2,7 @@
 
 # --
 # bin/ps.ImportExportDynamicFields.pl - import/export dynamic fields
-# Copyright (C) 2013 Perl-Services.de, http://perl-services.de
+# Copyright (C) 2013 - 2014 Perl-Services.de, http://perl-services.de
 # --
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU AFFERO General Public License as published by
@@ -27,6 +27,15 @@ use File::Basename;
 use FindBin qw($RealBin);
 use lib dirname($RealBin);
 
+use Kernel::System::ObjectManager;
+
+# create common objects
+local $Kernel::OM = Kernel::System::ObjectManager->new(
+    'Kernel::System::Log' => {
+        LogPrefix => 'OTRS-ps.ImportExportPostmasterFilter.pl',
+    },
+);
+
 use vars qw (%opts);
 use Getopt::Long;
 GetOptions(
@@ -34,26 +43,8 @@ GetOptions(
     'f=s' => \$opts{f},
 );
 
-use Kernel::Config;
-use Kernel::System::Encode;
-use Kernel::System::Log;
-use Kernel::System::Time;
-use Kernel::System::Main;
-use Kernel::System::DB;
-use Kernel::System::DynamicField::PerlServicesUtils;
-
-# create common objects
-my %CommonObject = ();
-$CommonObject{ConfigObject} = Kernel::Config->new(%CommonObject);
-$CommonObject{EncodeObject} = Kernel::System::Encode->new(%CommonObject);
-$CommonObject{LogObject}    = Kernel::System::Log->new(
-    LogPrefix => 'OTRS-ps.ImportExportDynamicFields.pl',
-    %CommonObject,
-);
-$CommonObject{TimeObject} = Kernel::System::Time->new(%CommonObject);
-$CommonObject{MainObject} = Kernel::System::Main->new(%CommonObject);
-$CommonObject{DBObject}   = Kernel::System::DB->new(%CommonObject);
-$CommonObject{UtilObject} = Kernel::System::DynamicField::PerlServicesUtils->new(%CommonObject);
+my $UtilObject = $Kernel::OM->Get('Kernel::System::DynamicField::PerlServicesUtils');
+my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
 
 $opts{m} ||= 'export';
 $opts{m} = lc $opts{m};
@@ -85,13 +76,13 @@ if ( $opts{m} eq 'export' ) {
     if ( @ARGV ) {
         my @IDs;
         for my $Name ( @ARGV ) {
-            push @IDs, $CommonObject{UtilObject}->FieldLookup( Name => $Name );
+            push @IDs, $UtilObject->FieldLookup( Name => $Name );
         }
 
         $Params{IDs} = \@IDs if @IDs;
     }
 
-    my $JSON = $CommonObject{UtilObject}->DynamicFieldsExport(
+    my $JSON = $UtilObject->DynamicFieldsExport(
         %Params,
     );
 
@@ -99,18 +90,18 @@ if ( $opts{m} eq 'export' ) {
         print $JSON;
     }
     else {
-        $CommonObject{MainObject}->FileWrite(
+        $MainObject->FileWrite(
             Location => $opts{f},
             Content  => \$JSON,
         );
     }
 }
 else {
-    my $ContentRef = $CommonObject{MainObject}->FileRead(
+    my $ContentRef = $MainObject->FileRead(
         Location => $opts{f},
     );
 
-    $CommonObject{UtilObject}->DynamicFieldsImport(
+    $UtilObject->DynamicFieldsImport(
         Fields => ${$ContentRef},
         UserID => 1,
     );
