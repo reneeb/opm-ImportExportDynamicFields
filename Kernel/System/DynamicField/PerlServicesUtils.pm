@@ -1,6 +1,6 @@
 # --
 # Kernel/System/DynamicField/PerlServicesUtils.pm - Utility module for DynamicFields provided by Perl-Services.de
-# Copyright (C) 2013 Perl-Services.de, http://perl-services.de
+# Copyright (C) 2013 - 2014 Perl-Services.de, http://perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
@@ -12,10 +12,17 @@ package Kernel::System::DynamicField::PerlServicesUtils;
 use strict;
 use warnings;
 
-use Kernel::System::Cache;
-use Kernel::System::JSON;
-use Kernel::System::DynamicField;
-use Kernel::System::Valid;
+our $VERSION = 0.01;
+
+our @ObjectDependencies = qw(
+    Kernel::Config
+    Kernel::System::Log
+    Kernel::System::DB
+    Kernel::System::Cache
+    Kernel::System::JSON
+    Kernel::System::DynamicField
+    Kernel::System::Valid
+);
 
 sub new {
     my ( $Type, %Param ) = @_;
@@ -24,26 +31,12 @@ sub new {
     my $Self = {%Param};
     bless( $Self, $Type );
 
-    # check all needed objects
-    for my $Needed ( qw(DBObject ConfigObject LogObject MainObject EncodeObject) ) {
-        if ( !$Self->{$Needed} ) {
-            die "Got no $Needed!",
-        }
-    }
-
-    # create additional objects
-    $Self->{JSONObject}         = Kernel::System::JSON->new( %{$Self} );
-    $Self->{DynamicFieldObject} = Kernel::System::DynamicField->new( %{$Self} );
-    $Self->{ValidObject}        = Kernel::System::Valid->new( %{$Self} );
-    $Self->{CacheObject}        = Kernel::System::Cache->new( %{$Self} );
-
-    # get the cache TTL (in seconds)
-    $Self->{CacheTTL}
-        = int( $Self->{ConfigObject}->Get('DynamicField::CacheTTL') || 3600 );
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+    my $DBObject     = $Kernel::OM->Get('Kernel::System::DB');
 
     # set lower if database is case sensitive
     $Self->{Lower} = '';
-    if ( !$Self->{DBObject}->GetDatabaseFunction('CaseInsensitive') ) {
+    if ( !$DBObject->GetDatabaseFunction('CaseInsensitive') ) {
         $Self->{Lower} = 'LOWER';
     }
 
@@ -54,17 +47,19 @@ sub new {
 sub FieldLookup {
     my ($Self, %Param) = @_;
 
+    my $DBObject = $Kernel::OM->Get('Kernel::System::DB');
+
     if ( $Param{Name} ) {
         my $CheckSQL  = "SELECT id FROM dynamic_field WHERE $Self->{Lower}(name) = $Self->{Lower}(?)";
 
-        return if !$Self->{DBObject}->Prepare(
+        return if !$DBObject->Prepare(
             SQL   => $CheckSQL,
             Bind  => [ \$Param{Name} ],
             Limit => 1,
         );
 
         my $ID;
-        while ( my @Row = $Self->{DBObject}->FetchrowArray() ) {
+        while ( my @Row = $DBObject->FetchrowArray() ) {
             $ID = $Row[0];
         }
 
@@ -78,6 +73,10 @@ sub FieldLookup {
 sub DynamicFieldsExport {
     my ($Self, %Param) = @_;
 
+    my $DBObject    = $Kernel::OM->Get('Kernel::System::DB');
+    my $ValidObject = $Kernel::OM->Get('Kernel::System::Valid');
+    my $JSONObject  = $Kernel::OM->Get('Kernel::System::JSON');
+
     my $SQL = 'SELECT id, name, label, field_order, field_type, object_type, config, valid_id '
         . ' FROM dynamic_field';
 
@@ -89,13 +88,13 @@ sub DynamicFieldsExport {
         @Bind = map{ \$_ }@{$Param{IDs}};
     }
 
-    return '[]' if !$Self->{DBObject}->Prepare(
+    return '[]' if !$DBObject->Prepare(
         SQL  => $SQL,
         Bind => \@Bind,
     );
 
     my @Fields;
-    while ( my @Row = $Self->{DBObject}->FetchrowArray() ) {
+    while ( my @Row = $DBObject->FetchrowArray() ) {
         my %Field = (
             Name       => $Row[1],
             Label      => $Row[2],
@@ -105,12 +104,12 @@ sub DynamicFieldsExport {
             Config     => $Row[6],
         );
 
-        $Field{Valid} = $Self->{ValidObject}->ValidLookup( ValidID => $Row[7] );
+        $Field{Valid} = $ValidObject->ValidLookup( ValidID => $Row[7] );
 
         push @Fields, \%Field;
     }
 
-    my $JSON = $Self->{JSONObject}->Encode(
+    my $JSON = $JSONObject->Encode(
         Data => \@Fields,
     ); 
 
@@ -120,9 +119,16 @@ sub DynamicFieldsExport {
 sub DynamicFieldsImport {
     my ($Self, %Param) = @_;
 
+    my $DBObject     = $Kernel::OM->Get('Kernel::System::DB');
+    my $ValidObject  = $Kernel::OM->Get('Kernel::System::Valid');
+    my $JSONObject   = $Kernel::OM->Get('Kernel::System::JSON');
+    my $LogObject    = $Kernel::OM->Get('Kernel::System::Log');
+    my $ConfigObject = $Kernel::OM->Get('Kernel::Config');
+    my $CacheObject  = $Kernel::OM->Get('Kernel::System::Cache');
+
     for my $Needed ( qw(Fields UserID) ) {
         if ( !$Param{$Needed} ) {
-            $Self->{LogObject}->Log(
+            $LogObject->Log(
                 Priority => 'error',
                 Message  => "Need $Needed!",
             );
@@ -131,9 +137,9 @@ sub DynamicFieldsImport {
         }
     }
 
-    my $DoOverride = $Self->{ConfigObject}->Get( 'DynamicFieldsImport::DoOverride' );
+    my $DoOverride = $ConfigObject->Get( 'DynamicFieldsImport::DoOverride' );
 
-    my $Fields = $Self->{JSONObject}->Decode(
+    my $Fields = $JSONObject->Decode(
         Data => $Param{Fields},
     );
 
@@ -151,23 +157,23 @@ sub DynamicFieldsImport {
 
     FIELD:
     for my $Field ( @{$Fields} ) {
-        next FIELD if !$Self->{DBObject}->Prepare(
+        next FIELD if !$DBObject->Prepare(
             SQL   => $CheckSQL,
             Bind  => [ \($Field->{Name}) ],
             Limit => 1,
         );
 
         my $ID;
-        while ( my @Row = $Self->{DBObject}->FetchrowArray() ) {
+        while ( my @Row = $DBObject->FetchrowArray() ) {
             $ID = $Row[0];
         }
 
         next FIELD if $ID && !$DoOverride;
 
-        $Field->{ValidID} = $Self->{ValidObject}->ValidLookup( Valid => $Field->{Valid} ) || 1;
+        $Field->{ValidID} = $ValidObject->ValidLookup( Valid => $Field->{Valid} ) || 1;
 
         if ( $ID ) {
-            next FIELD if !$Self->{DBObject}->Do(
+            next FIELD if !$DBObject->Do(
                 SQL  => $UpdateSQL,
                 Bind => [
                     \$Field->{Name},
@@ -183,7 +189,7 @@ sub DynamicFieldsImport {
             );
         } 
         else {
-            next FIELD if !$Self->{DBObject}->Do(
+            next FIELD if !$DBObject->Do(
                 SQL  => $InsertSQL,
                 Bind => [
                     \$Field->{Name},
@@ -200,7 +206,7 @@ sub DynamicFieldsImport {
         }
     }
 
-    $Self->{CacheObject}->CleanUp(
+    $CacheObject->CleanUp(
         Type => 'DynamicField',
     );
 
