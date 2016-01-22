@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <otrs_config version="1.0" init="Config">
-    <CVS>$Id: ImportExportDynamicFields.xml,v 1.55 2011/08/24 08:42:06 ud Exp $</CVS>
     <ConfigItem Name="DynamicFieldsImport::DoOverride" Required="0" Valid="1">
         <Description Translatable="1">Override existing dynamic fields when a field with an existing name is imported</Description>
         <Group>ImportExportDynamicFields</Group>
