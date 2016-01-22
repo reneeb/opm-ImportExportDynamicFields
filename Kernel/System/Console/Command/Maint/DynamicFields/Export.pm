@@ -49,9 +49,12 @@ sub Run {
 
     $Self->Print("<yellow>Export dynamic field configuration...</yellow>\n");
 
+    my $UtilObject = $Kernel::OM->Get('Kernel::System::DynamicField::PerlServicesUtils');
+    my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
+
     my %Params;
 
-    my @Names = @{ $Self->GetOptions('field') || [] };
+    my @Names = @{ $Self->GetOption('field') || [] };
     if ( @Names ) {
         my @IDs;
         for my $Name ( @Names ) {

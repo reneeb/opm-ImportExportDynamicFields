@@ -41,6 +41,9 @@ sub Run {
 
     $Self->Print("<yellow>Import dynamic field configuration...</yellow>\n");
 
+    my $UtilObject = $Kernel::OM->Get('Kernel::System::DynamicField::PerlServicesUtils');
+    my $MainObject = $Kernel::OM->Get('Kernel::System::Main');
+
     my $File       = $Self->GetOption('file');
     my $ContentRef = $MainObject->FileRead(
         Location => $File,
