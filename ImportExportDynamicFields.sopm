@@ -2,15 +2,18 @@
 <otrs_package version="1.0">
     <!-- GENERATED WITH OTRS::OPM::Maker::Command::sopm (1.33) -->
     <Name>ImportExportDynamicFields</Name>
-    <Version>5.0.1</Version>
+    <Version>5.0.2</Version>
     <Framework>5.0.x</Framework>
     <Vendor>Perl-Services.de</Vendor>
     <URL>http://www.perl-services.de</URL>
     <Description Lang="de">Dynamische Felder importieren und exportieren.</Description>
-    <Description Lang="en">Import/Export dynamic fields</Description>
+    <Description Lang="en">Import/Export dynamic fields.</Description>
+    <Description Lang="hu">Dinamikus mezők importálása és exportálása.</Description>
     <License>GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007</License>
     <Filelist>
         <File Permission="644" Location="Kernel/Config/Files/ImportExportDynamicFields.xml" />
+        <File Permission="644" Location="Kernel/Language/de_ImportExportDynamicFields.pm" />
+        <File Permission="644" Location="Kernel/Language/hu_ImportExportDynamicFields.pm" />
         <File Permission="644" Location="Kernel/System/Console/Command/Maint/DynamicFields/Export.pm" />
         <File Permission="644" Location="Kernel/System/Console/Command/Maint/DynamicFields/Import.pm" />
         <File Permission="644" Location="Kernel/System/DynamicField/PerlServicesUtils.pm" />
