@@ -12,7 +12,7 @@ package Kernel::System::DynamicField::PerlServicesUtils;
 use strict;
 use warnings;
 
-our $VERSION = 0.01;
+use JSON;
 
 our @ObjectDependencies = qw(
     Kernel::Config
@@ -139,9 +139,13 @@ sub DynamicFieldsImport {
 
     my $DoOverride = $ConfigObject->Get( 'DynamicFieldsImport::DoOverride' );
 
-    my $Fields = $JSONObject->Decode(
-        Data => $Param{Fields},
-    );
+    my $Fields;
+    eval {
+        #$Fields = $JSONObject->Decode(
+        #    Data => $Param{Fields},
+        #);
+        $Fields = JSON->new->allow_nonref(1)->utf8(1)->decode( $Param{Fields} );
+    };
 
     return if !$Fields;
 
