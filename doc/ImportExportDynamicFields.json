@@ -1,6 +1,6 @@
 {
     "name": "ImportExportDynamicFields",
-    "version": "5.0.1",
+    "version": "5.0.2",
     "framework": [
         "5.0.x"
     ],
@@ -10,7 +10,8 @@
     },
     "license": "GNU AFFERO GENERAL PUBLIC LICENSE Version 3, November 2007",
     "description" : {
-        "en": "Import/Export dynamic fields",
-        "de": "Dynamische Felder importieren und exportieren."
+        "en": "Import/Export dynamic fields.",
+        "de": "Dynamische Felder importieren und exportieren.",
+        "hu": "Dinamikus mezők importálása és exportálása."
     }
 }
