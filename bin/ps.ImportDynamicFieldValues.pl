@@ -55,7 +55,7 @@ $CommonObject{TimeObject}         = Kernel::System::Time->new(%CommonObject);
 $CommonObject{MainObject}         = Kernel::System::Main->new(%CommonObject);
 $CommonObject{DBObject}           = Kernel::System::DB->new(%CommonObject);
 $CommonObject{CSVObject}          = Kernel::System::CSV->new(%CommonObject);
-$CommonObject{DynamicFieldObject} = Kernel::System::DynamicField( %CommonObject );
+$CommonObject{DynamicFieldObject} = Kernel::System::DynamicField->new( %CommonObject );
 
 if (
     !$opts{file} || !-f $opts{file} || !$opts{name}
@@ -77,6 +77,8 @@ value are different, it should look like
   "key2";"value2"
 
 ~;
+
+    exit 1;
 }
 
 my $ContentRef = $CommonObject{MainObject}->FileRead(
