@@ -86,13 +86,13 @@ sub Run {
                     Encoding => 'Raw'
                 );
 
-                my $Success = $ImExObject->PostmasterFilterImport(
+                my $Success = $ImExObject->DynamicFieldsImport(
                     Fields => $UploadStuff{Content},
                     UserID => $Self->{UserID},
                 );
 
                 if ( $Success ) {
-                    return $LayoutObject->Redirect( OP => 'AdminDynamicFields' );
+                    return $LayoutObject->Redirect( OP => 'Action=AdminDynamicField' );
                 }
             }
         }
