@@ -16,7 +16,7 @@
                 <Item Key="Debug">0</Item>
                 <Item Key="Templates">
                     <Hash>
-                        <Item Key="AdminDynamicFields">1</Item>
+                        <Item Key="AdminDynamicField">1</Item>
                     </Hash>
                 </Item>
             </Hash>
