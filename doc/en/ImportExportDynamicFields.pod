@@ -1,0 +1,16 @@
+=head1 NAME
+
+ImportExportDynamicFields
+
+=head1 DESCRIPTION
+
+This addon helps to simplify DynamicField administration. It provides ways to export and import
+Dynamic Fields.
+
+=head2 Console
+
+=head2 Web interface
+
+As of version
+
+=head1 

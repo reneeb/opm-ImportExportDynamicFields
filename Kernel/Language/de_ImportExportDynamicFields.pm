@@ -1,6 +1,6 @@
 # --
 # Kernel/Language/de_ImportExportDynamicFields.pm - the German translation for ImportExportDynamicFields
-# Copyright (C) 2011-2016 Perl-Services, http://www.perl-services.de
+# Copyright (C) 2011 - 2022 Perl-Services, https://www.perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you

@@ -1,6 +1,6 @@
 # --
 # Kernel/System/DynamicField/PerlServicesUtils.pm - Utility module for DynamicFields provided by Perl-Services.de
-# Copyright (C) 2013 - 2014 Perl-Services.de, http://perl-services.de
+# Copyright (C) 2013 - 2022 Perl-Services.de, https://www.perl-services.de
 # --
 # This software comes with ABSOLUTELY NO WARRANTY. For details, see
 # the enclosed file COPYING for license information (AGPL). If you
